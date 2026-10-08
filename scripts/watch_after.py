@@ -7,6 +7,8 @@
 
 Печатает найденный ответ и выходит 0; по таймауту — код 2.
 Запускать фоном (с уведомлением при завершении).
+Окно опроса — 500 событий: поток под-агентов вытесняет главные сообщения
+из малых окон (окно в 20 событий пропустило и команду владельца, и передачу).
 ВАЖНО: seq сравнивается численно — строковое сравнение ('10017' < '9474')
 молча пропускает ответы после 9999.
 """
@@ -47,7 +49,7 @@ def main():
     cycles = int(args[args.index('--cycles') + 1]) if '--cycles' in args else 30
     cfg = os.environ.get('COWORK_CFG',
                          os.path.expanduser('~/.config/cowork-bridge/curlrc'))
-    url = 'https://claude.ai/v1/code/sessions/%s/events?limit=25' % cse
+    url = 'https://claude.ai/v1/code/sessions/%s/events?limit=500' % cse
 
     for i in range(cycles):
         r = subprocess.run(['curl', '-sS', '--compressed', '-m', '60', '-K', cfg,

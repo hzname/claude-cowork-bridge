@@ -47,8 +47,17 @@ def main():
         seq0 = int(args[1])
     interval = int(args[args.index('--interval') + 1]) if '--interval' in args else 90
     cycles = int(args[args.index('--cycles') + 1]) if '--cycles' in args else 30
-    cfg = os.environ.get('COWORK_CFG',
-                         os.path.expanduser('~/.config/cowork-bridge/curlrc'))
+    cfg = os.environ.get('COWORK_CFG')
+    if not cfg:
+        for cand in (os.path.expanduser('~/.config/cowork-bridge/curlrc'),
+                     '/home/sg/cowork-import/curlrc_base.txt',
+                     os.path.expanduser('~/.hermes/cache/scratch/curlrc_base.txt')):
+            if os.path.exists(cand):
+                cfg = cand
+                break
+    if not cfg:
+        print('нет куки-конфига: COWORK_CFG / ~/.config/cowork-bridge/curlrc')
+        sys.exit(2)
     url = 'https://claude.ai/v1/code/sessions/%s/events?limit=500' % cse
 
     for i in range(cycles):
@@ -79,7 +88,7 @@ def main():
             except Exception as ex:
                 print('ошибка:', ex)
         else:
-            print('http:', r.stdout.strip())
+            print('http:', (r.stdout.strip() or r.stderr.strip())[:200])
         time.sleep(interval)
 
     print('== таймаут: нового главного сообщения нет ==')

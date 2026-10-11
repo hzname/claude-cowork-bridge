@@ -1,8 +1,9 @@
 # claude-cowork-bridge
 
-Скилл для Hermes Agent — работа с cowork-сессией Claude (claude.ai, `cse_…`)
-как со второй командой: поставить задачу, дождаться ответа, забрать артефакты,
-проверить результат.
+Скилл для Hermes Agent — работа с сессиями Claude как со второй командой:
+cowork-сессия (claude.ai, `cse_…`) — поставить задачу, дождаться ответа,
+забрать артефакты, проверить результат; живая локальная сессия Claude Code —
+подключиться и доставить сообщение (inbox-сокет).
 
 Документация скилла — русская (`SKILL.md` + `references/api.md`).
 
@@ -16,6 +17,10 @@
 | `scripts/watch_after.py` | ждать новое главное сообщение (числовое сравнение seq) |
 | `scripts/cowork_get.py` | скачать файл из среды сессии |
 | `scripts/cowork_pull.py` | выкачать cookies из Claude Desktop + полный экспорт ленты |
+| `scripts/cc_sessions.py` | список живых сессий Claude Code проекта (ручной выбор, если их несколько) |
+| `scripts/cc_send.py` | доставить сообщение в живую сессию Claude Code (inbox-сокет) |
+| `scripts/cc_peek.py` | шапка и хвост лога сессии (проверка доставки) |
+| `scripts/cc_search.py` | поиск по тексту сообщений лога сессии |
 
 ## Быстрый старт
 
@@ -40,6 +45,16 @@ python3 scripts/watch_after.py cse_XXXXXXXX 12345
 python3 scripts/cowork_get.py cse_XXXXXXXX /mnt/user-data/outputs/result.zip ./result.zip
 ```
 
+Доставка в живую сессию Claude Code (локально, inbox-сокет):
+
+```sh
+# живые сессии проекта — выбрать вручную, если их несколько
+python3 scripts/cc_sessions.py ~/robot-dog
+
+# доставить сообщение (кадр: newline-JSON + half-close; ответ не придёт — канал односторонний)
+python3 scripts/cc_send.py /run/user/1000/cc-socks/<pid>.sock <sessionId> context.txt
+```
+
 ## Питфоллы (полный список — в `SKILL.md`)
 
 - `sequence_num` сравнивать только численно: строковое сравнение молча
@@ -52,6 +67,9 @@ python3 scripts/cowork_get.py cse_XXXXXXXX /mnt/user-data/outputs/result.zip ./r
   владелец через интерфейс Claude Desktop.
 - Результат сессии — самоотчёт; артефакты проверять независимо
   (диффы, прогоны), а не доверять описанию.
+- Claude Code: pid и сокет меняются при перезапуске сессии; `session_id`
+  кадра обязан совпадать с получателем (иначе молчаливый дроп); при
+  нескольких сессиях проекта — выбор вручную (`cc_sessions.py`).
 
 ## Установка как скилла Hermes
 
@@ -69,6 +87,7 @@ MIT — см. `LICENSE`.
 
 ---
 
-*A Hermes Agent skill + CLI tools to drive a Claude "cowork" session
-(claude.ai `cse_…`): post tasks, watch for replies, download artifacts,
-verify deliverables. Documents in Russian. MIT.*
+*A Hermes Agent skill + CLI tools to drive Claude sessions: a "cowork"
+session (claude.ai `cse_…`) — post tasks, watch replies, download artifacts,
+verify deliverables — and live local Claude Code sessions (message over the
+inbox socket). Documents in Russian. MIT.*
